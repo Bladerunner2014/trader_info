@@ -6,7 +6,7 @@ from constants.error_message import ErrorMessage
 from constants.info_message import InfoMessage
 from blueprint import v1_blueprint
 
-from managers.trader_manager import TraderManager
+from managers.trader_manager import TraderManager, Summarymanager
 from swagger import swagger
 from log import log
 
@@ -41,6 +41,29 @@ def update_trader():
     trader_manager = TraderManager()
     response = trader_manager.trader_update(request_data)
     return response.generate_response()
+
+
+@v1_blueprint.route("/trader/upload", methods=["POST"])
+def upload_summary_file():
+    user_id = request.headers.get('user_id')
+    raw_data = request.get_data()
+    if len(raw_data) < 3:
+        return 'badrequest', 300
+    sum_manager = Summarymanager()
+    sum_manager.uploader(user_id, raw_data)
+
+    return 'ok', 200
+
+
+@v1_blueprint.route("/trader/download", methods=["POST"])
+def download_summary_file():
+    user_id = request.headers.get('user_id')
+    sum_manager = Summarymanager()
+    if user_id is None:
+        return logger.error(ErrorMessage.BAD_REQUEST)
+    return sum_manager.downloader(user_id).generate_response()
+
+    pass
 
 
 swagger.run_swagger(app)
