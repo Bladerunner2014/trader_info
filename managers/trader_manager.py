@@ -4,6 +4,7 @@ from http_handler.response_handler import ResponseHandler
 from models.traders import TradersDB
 from constants.error_message import ErrorMessage
 from constants.info_message import InfoMessage
+from object_storage import uploader_downloader
 
 import logging
 
@@ -19,12 +20,10 @@ class TraderManager:
 
     # insert new trader to the database
     def handle_trader(self, dt: dict):
-
         trader = TradersDB()
         trader.user_id = dt['user_id']
         trader.is_verified = dt.get('is_verified', False)
         trader.is_active = dt.get('is_active', True)
-        trader.summary_file = dt['summary_file']
         trader.bio = dt['bio']
 
         try:
@@ -63,4 +62,31 @@ class TraderManager:
         res.set_status_code(StatusCode.SUCCESS)
         res.set_response({"message": InfoMessage.TRADER_UPDATE})
 
+        return res
+
+
+class Summarymanager:
+
+    def __init__(self):
+        self.config = dotenv_values(".env")
+        self.obj_storage = uploader_downloader.Objectstorage(self.config["BUCKET_NAME"])
+        self.logger = logging.getLogger(__name__)
+
+    def uploader(self, user_id, raw_data):
+        try:
+            self.obj_storage.upload(user_id, raw_data)
+        except Exception as error:
+            self.logger.error(ErrorMessage.MINIO_INSERT)
+            self.logger.error(error)
+
+    def downloader(self, user_id):
+        try:
+            result = self.obj_storage.download(str(user_id))
+        except Exception as error:
+            self.logger.error(ErrorMessage.MINIO_SELECT)
+            self.logger.error(error)
+            raise Exception
+        res = ResponseHandler()
+        res.set_response({"message": result})
+        res.set_status_code(StatusCode.SUCCESS)
         return res
