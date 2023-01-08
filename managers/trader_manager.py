@@ -17,11 +17,9 @@ class TraderManager:
         self.config = dotenv_values(".env")
         self.logger = logging.getLogger(__name__)
         self.dao = TraderDao()
-        # self.obj_storage = uploader_downloader.Objectstorage('dev')
 
     # insert new trader to the database
     def handle_trader(self, dt: dict):
-        # self.obj_storage.upload(dt['user_id'], dt['summary_file'])
         trader = TradersDB()
         trader.user_id = dt['user_id']
         trader.is_verified = dt.get('is_verified', False)
@@ -42,7 +40,6 @@ class TraderManager:
     def trader_detail(self, user_id):
         try:
             result = self.dao.select_trader(user_id)
-            # sum_file = self.obj_storage.download(user_id)
         except Exception as error:
             self.logger.error(ErrorMessage.DB_SELECT)
             self.logger.error(error)
@@ -71,7 +68,8 @@ class TraderManager:
 class Summarymanager:
 
     def __init__(self):
-        self.obj_storage = uploader_downloader.Objectstorage('dev')
+        self.config = dotenv_values(".env")
+        self.obj_storage = uploader_downloader.Objectstorage(self.config["BUCKET_NAME"])
         self.logger = logging.getLogger(__name__)
 
     def uploader(self, user_id, raw_data):

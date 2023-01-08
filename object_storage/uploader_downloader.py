@@ -3,15 +3,15 @@ from minio.error import S3Error
 import io
 from dotenv import dotenv_values
 
+config = dotenv_values(".env")
 
-# config = dotenv_values(".env")
 
 class Objectstorage:
     def __init__(self, bucket_name: str):
         self.client = Minio(
-            endpoint="localhost:9000",
-            access_key="4hTBLuRu0wRU9izO",
-            secret_key="lSbP4pq3ME5f6BBnmvbyT2A91wgawLFu",
+            endpoint=config["ENDPOINT"],
+            access_key=config["ACCESS_KEY"],
+            secret_key=config["SECRET_KEY"],
             secure=False
         )
         self.bucket = bucket_name

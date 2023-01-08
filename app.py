@@ -5,7 +5,7 @@ from dotenv import dotenv_values
 from constants.error_message import ErrorMessage
 from constants.info_message import InfoMessage
 from blueprint import v1_blueprint
-
+from object_storage.uploader_downloader import Objectstorage
 from managers.trader_manager import TraderManager, Summarymanager
 from swagger import swagger
 from log import log
@@ -62,8 +62,6 @@ def download_summary_file():
     if user_id is None:
         return logger.error(ErrorMessage.BAD_REQUEST)
     return sum_manager.downloader(user_id).generate_response()
-
-    pass
 
 
 swagger.run_swagger(app)
