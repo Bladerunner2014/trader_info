@@ -90,3 +90,31 @@ class Summarymanager:
         res.set_response({"message": result})
         res.set_status_code(StatusCode.SUCCESS)
         return res
+
+
+class ResumeManager:
+
+    def __init__(self):
+        self.config = dotenv_values(".env")
+        self.obj_storage = uploader_downloader.Objectstorage(self.config["BUCKET_NAME_Resume"])
+        self.logger = logging.getLogger(__name__)
+
+    def resume_uploader(self, user_id, raw_data):
+        user_id = user_id + ".pdf"
+        try:
+            self.obj_storage.upload(user_id, raw_data)
+        except Exception as error:
+            self.logger.error(ErrorMessage.MINIO_INSERT)
+            self.logger.error(error)
+
+    def resume_downloader(self, user_id):
+        try:
+            result = self.obj_storage.download(str(user_id))
+        except Exception as error:
+            self.logger.error(ErrorMessage.MINIO_SELECT)
+            self.logger.error(error)
+            raise Exception
+        res = ResponseHandler()
+        res.set_response({"message": result})
+        res.set_status_code(StatusCode.SUCCESS)
+        return res

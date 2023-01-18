@@ -25,7 +25,7 @@ class Objectstorage:
 
     def download(self, object_name):
         try:
-            result = self.client.get_object(self.bucket, object_name).data.decode('ascii')
+            result = self.client.get_object(self.bucket, object_name).data.decode()
         except S3Error as exc:
             print("error occurred.", exc)
         return result
