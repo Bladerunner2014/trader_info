@@ -1,14 +1,14 @@
 import logging
 from flask import Flask, request
 from dotenv import dotenv_values
-
 from constants.error_message import ErrorMessage
 from constants.info_message import InfoMessage
 from blueprint import v1_blueprint
 from object_storage.uploader_downloader import Objectstorage
-from managers.trader_manager import TraderManager, Summarymanager
+from managers.trader_manager import TraderManager, Summarymanager, ResumeManager
 from swagger import swagger
 from log import log
+
 
 app = Flask("trader")
 config = dotenv_values(".env")
@@ -55,13 +55,27 @@ def upload_summary_file():
     return 'ok', 200
 
 
-@v1_blueprint.route("/trader/download", methods=["POST"])
-def download_summary_file():
+# For upload the trader resume file
+@v1_blueprint.route("/trader/resume-upload", methods=["POST"])
+def upload_resume_file():
     user_id = request.headers.get('user_id')
-    sum_manager = Summarymanager()
+    raw_data = request.get_data()
+    if len(raw_data) < 3:
+        return 'badrequest', 300
+    resume_manager = ResumeManager()
+    resume_manager.resume_uploader(user_id, raw_data)
+
+    return 'Resume successfully uploaded', 200
+
+
+# For download the trader resume file
+@v1_blueprint.route("/trader/resume-download", methods=["POST"])
+def download_resume_file():
+    user_id = request.headers.get('user_id')
+    resume_manager = ResumeManager()
     if user_id is None:
         return logger.error(ErrorMessage.BAD_REQUEST)
-    return sum_manager.downloader(user_id).generate_response()
+    return resume_manager.resume_downloader(user_id).generate_response()
 
 
 swagger.run_swagger(app)
