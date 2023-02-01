@@ -35,7 +35,7 @@ class QueryBuilder:
             self.logger.error(error)
             raise error
         self.db.close_cursor_connection(cursor)
-        self.db.return_connection_to_pool(self.db.db_connection)
+        # self.db.return_connection_to_pool(self.db.db_connection)
 
     # TODO generalize select
     def select(self, column: list = "*", condition: str = None, group: list = None, order: str = None,
@@ -81,3 +81,4 @@ class QueryBuilder:
             raise error
         self.db.close_cursor_connection(cursor)
         # self.db.return_connection_to_pool(self.db.db_connection)
+

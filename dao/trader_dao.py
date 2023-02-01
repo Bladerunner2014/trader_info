@@ -43,3 +43,5 @@ class TraderDao:
             self.db.update(update=ls, condition=condi.condition)
         except Exception as error:
             raise error
+
+

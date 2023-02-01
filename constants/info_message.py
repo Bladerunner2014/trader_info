@@ -15,3 +15,6 @@ class InfoMessage:
     DB_QUERY = "db query"
 
     KAFKA_PRODUCE = "kafka produce"
+
+    MINIO_INSERT = "content inserted to minio successfully"
+

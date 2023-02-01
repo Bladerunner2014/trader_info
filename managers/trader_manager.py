@@ -5,6 +5,7 @@ from models.traders import TradersDB
 from constants.error_message import ErrorMessage
 from constants.info_message import InfoMessage
 from object_storage import uploader_downloader
+from db.query_builder import QueryBuilder
 
 import logging
 
@@ -17,6 +18,7 @@ class TraderManager:
         self.config = dotenv_values(".env")
         self.logger = logging.getLogger(__name__)
         self.dao = TraderDao()
+        self.db = QueryBuilder("test_trader")
 
     # insert new trader to the database
     def handle_trader(self, dt: dict):
@@ -34,16 +36,26 @@ class TraderManager:
             raise Exception
         res = ResponseHandler()
         res.set_status_code(StatusCode.SUCCESS)
+        res.set_response({"message": InfoMessage.TRADER_SUCCESS})
+
         return res
 
     # return the information of a trader
     def trader_detail(self, user_id):
-        try:
-            result = self.dao.select_trader(user_id)
-        except Exception as error:
-            self.logger.error(ErrorMessage.DB_SELECT)
-            self.logger.error(error)
-            raise Exception
+        if user_id == 'all':
+            try:
+                result = self.db.select()
+            except Exception as error:
+                self.logger.error(ErrorMessage.DB_SELECT)
+                self.logger.error(error)
+                raise Exception
+        else:
+            try:
+                result = self.dao.select_trader(user_id)
+            except Exception as error:
+                self.logger.error(ErrorMessage.DB_SELECT)
+                self.logger.error(error)
+                raise Exception
 
         res = ResponseHandler()
         res.set_response({"message": result})
@@ -53,16 +65,30 @@ class TraderManager:
     # update the information of an investor
     def trader_update(self, data: dict):
         try:
-            self.dao.update_trader(data)
+            result = self.dao.select_trader(data["user_id"])
         except Exception as error:
             self.logger.error(ErrorMessage.DB_SELECT)
             self.logger.error(error)
             raise Exception
         res = ResponseHandler()
-        res.set_status_code(StatusCode.SUCCESS)
-        res.set_response({"message": InfoMessage.TRADER_UPDATE})
 
-        return res
+        if not result:
+            self.logger.error(ErrorMessage.DB_SELECT)
+            res.set_status_code(StatusCode.NOT_FOUND)
+            res.set_response({"message": ErrorMessage.DB_SELECT})
+            return res
+        else:
+
+            try:
+                self.dao.update_trader(data)
+            except Exception as error:
+                self.logger.error(ErrorMessage.DB_SELECT)
+                self.logger.error(error)
+                raise Exception
+            res.set_status_code(StatusCode.SUCCESS)
+            res.set_response({"message": InfoMessage.TRADER_UPDATE})
+
+            return res
 
 
 class Summarymanager:
@@ -73,15 +99,24 @@ class Summarymanager:
         self.logger = logging.getLogger(__name__)
 
     def uploader(self, user_id, raw_data):
+        user_id_with_suffix = user_id + ".csv"
+        res = ResponseHandler()
         try:
-            self.obj_storage.upload(user_id, raw_data)
+            self.obj_storage.upload(user_id_with_suffix, raw_data)
+            res.set_status_code(StatusCode.SUCCESS)
+            res.set_response({"message": InfoMessage.MINIO_INSERT})
         except Exception as error:
             self.logger.error(ErrorMessage.MINIO_INSERT)
             self.logger.error(error)
+            res.set_status_code(StatusCode.INTERNAL_ERROR)
+            res.set_response({"message": ErrorMessage.MINIO_INSERT})
+
+        return res
 
     def downloader(self, user_id):
+        user_id_with_suffix = user_id + ".csv"
         try:
-            result = self.obj_storage.download(str(user_id))
+            result = self.obj_storage.download(user_id_with_suffix)
         except Exception as error:
             self.logger.error(ErrorMessage.MINIO_SELECT)
             self.logger.error(error)
@@ -101,15 +136,23 @@ class ResumeManager:
 
     def resume_uploader(self, user_id, raw_data):
         user_id = user_id + ".pdf"
+        res = ResponseHandler()
         try:
             self.obj_storage.upload(user_id, raw_data)
+            res.set_status_code(StatusCode.SUCCESS)
+            res.set_response({"message": InfoMessage.MINIO_INSERT})
         except Exception as error:
             self.logger.error(ErrorMessage.MINIO_INSERT)
             self.logger.error(error)
+            res.set_status_code(StatusCode.INTERNAL_ERROR)
+            res.set_response({"message": ErrorMessage.MINIO_INSERT})
+        return res
 
     def resume_downloader(self, user_id):
+        user_id = user_id + ".pdf"
+
         try:
-            result = self.obj_storage.download(str(user_id))
+            result = self.obj_storage.download(user_id)
         except Exception as error:
             self.logger.error(ErrorMessage.MINIO_SELECT)
             self.logger.error(error)

@@ -1,0 +1,39 @@
+version: '3'
+networks:
+  app-tier:
+    driver: bridge
+services:
+  minio:
+    image: 'bitnami/minio:latest'
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    volumes:
+      - C:\Users\mh\Desktop\trader_repo\data:/data
+    environment:
+      - MINIO_ROOT_USER=lgp8KIo4XRKCjK2C
+      - MINIO_ROOT_PASSWORD=MUxGEsgtFNEbXyzaDxmdVlJ3ZEHYN9pe
+    networks:
+      - app-tier
+  trader_repo:
+    image: trader_repo
+    ports:
+      - 5001:5001
+    networks:
+      - app-tier
+    environment:
+      - MINIO_SERVER_ACCESS_KEY=lgp8KIo4XRKCjK2C
+      - MINIO_SERVER_SECRET_KEY=MUxGEsgtFNEbXyzaDxmdVlJ3ZEHYN9pe
+  postgres:
+    image: postgres
+    ports:
+      - 5432
+
+    environment:
+      POSTGRES_USER: 'postgres'
+      POSTGRES_PASSWORD: '1234'
+      POSTGRES_DB: trader_repo
+
+
+
+
