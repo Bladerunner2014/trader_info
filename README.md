@@ -1,6 +1,6 @@
-# trader_repo
+# infra
 
-
+Infra template for flask projects
 
 ## Getting started
 
@@ -15,14 +15,14 @@ Already a pro? Just edit this README.md and make it your own. Want to make it ea
 
 ```
 cd existing_repo
-git remote add origin http://localhost/hsip/api/trader_repo.git
+git remote add origin http://localhost/hsip/api/infra.git
 git branch -M main
 git push -uf origin main
 ```
 
 ## Integrate with your tools
 
-- [ ] [Set up project integrations](http://localhost/hsip/api/trader_repo/-/settings/integrations)
+- [ ] [Set up project integrations](http://localhost/hsip/api/infra/-/settings/integrations)
 
 ## Collaborate with your team
 
