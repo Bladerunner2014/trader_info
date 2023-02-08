@@ -90,7 +90,7 @@ def upload_resume_file():
 
     raw_data = request.get_data()
     if len(raw_data) < 3:
-        return 'badrequest', 300
+        return 'Badrequest', 300
     resume_manager = ResumeManager()
     response = resume_manager.resume_uploader(user_id, raw_data)
 
@@ -98,7 +98,7 @@ def upload_resume_file():
 
 
 # For download the trader resume file
-@v1_blueprint.route("/trader/resume-download", methods=["POST"])
+@v1_blueprint.route("/trader/resume-download", methods=["GET"])
 def download_resume_file():
     user_id = request.headers.get('user_id')
     resume_manager = ResumeManager()
