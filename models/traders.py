@@ -10,6 +10,8 @@ class TradersDB:
     is_verified = 'is_verified'
     is_active = 'is_active'
     bio = None
+    api_key = 'api_key'
+    secret_key = 'secret_key'
     created_at = 'created_at'
     updated_at = 'updated_at'
 

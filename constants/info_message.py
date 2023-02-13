@@ -17,3 +17,4 @@ class InfoMessage:
     KAFKA_PRODUCE = "kafka produce"
 
     MINIO_INSERT = "content inserted to minio successfully"
+

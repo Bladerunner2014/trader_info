@@ -25,15 +25,14 @@ class Objectstorage:
     def download(self, object_name: str):
         try:
             data = self.client.get_object(self.bucket, object_name)
-            with open(object_name, 'wb') as file_data:
+            with open('minio_file.csv', 'wb') as file_data:
                 for d in data.stream(32 * 1024):
                     file_data.write(d)
         except S3Error as exc:
-            raise exc
+            print("error occurred.", exc)
 
-        # try:
-        #     res = self.client.get_object(self.bucket, object_name)
-        #     return res.read()
-        #
-        # except S3Error as exc:
-        #     raise exc
+        try:
+            return self.client.get_object(self.bucket, object_name).data.decode()
+        except S3Error as exc:
+            print("error occurred.", exc)
+

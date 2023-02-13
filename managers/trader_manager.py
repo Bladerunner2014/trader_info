@@ -27,6 +27,8 @@ class TraderManager:
         trader.is_verified = dt.get('is_verified', False)
         trader.is_active = dt.get('is_active', True)
         trader.bio = dt['bio']
+        trader.api_key = dt['api_key']
+        trader.secret_key = dt['secret_key']
 
         try:
             self.dao.insert_new_trader(trader)
@@ -56,9 +58,9 @@ class TraderManager:
                 self.logger.error(ErrorMessage.DB_SELECT)
                 self.logger.error(error)
                 raise Exception
-
+        dict_result = self.create_dict_from_postgres(result)
         res = ResponseHandler()
-        res.set_response({"message": result})
+        res.set_response(dict_result)
         res.set_status_code(StatusCode.SUCCESS)
         return res
 
@@ -89,6 +91,24 @@ class TraderManager:
             res.set_response({"message": InfoMessage.TRADER_UPDATE})
 
             return res
+
+    @staticmethod
+    def create_dict_from_postgres(res):
+        columns = ['id',
+                   'user_id',
+                   'is_verified',
+                   'is_active',
+                   'bio',
+                   'api_key',
+                   'secret_key',
+                   'created_at',
+                   'updated_at']
+        results_list = []
+        for ls in res:
+            results_list.append({columns[i]: ls[i] for i in range(len(columns))})
+        if len(results_list) == 1:
+            results_list = results_list[0]
+        return results_list
 
 
 class Summarymanager:
@@ -131,11 +151,11 @@ class ResumeManager:
 
     def __init__(self):
         self.config = dotenv_values(".env")
-        self.obj_storage = uploader_downloader.Objectstorage(self.config["BUCKET_NAME_RESUME"])
+        self.obj_storage = uploader_downloader.Objectstorage(self.config["BUCKET_NAME_Resume"])
         self.logger = logging.getLogger(__name__)
 
     def resume_uploader(self, user_id, raw_data):
-        user_id = user_id
+        user_id = user_id + ".pdf"
         res = ResponseHandler()
         try:
             self.obj_storage.upload(user_id, raw_data)
@@ -149,13 +169,15 @@ class ResumeManager:
         return res
 
     def resume_downloader(self, user_id):
+        user_id = user_id + ".pdf"
+
         try:
-            result = self.obj_storage.download(str(user_id))
+            result = self.obj_storage.download(user_id)
         except Exception as error:
             self.logger.error(ErrorMessage.MINIO_SELECT)
             self.logger.error(error)
             raise Exception
         res = ResponseHandler()
-        res.set_response({"message": InfoMessage.Verify_Download})
+        res.set_response({"message": result})
         res.set_status_code(StatusCode.SUCCESS)
         return res
