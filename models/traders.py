@@ -7,10 +7,11 @@ class TradersDB:
     __table_name__ = 'test_trader'
     id = 'id'
     user_id = 'user_id'
-    summary_file = 'summary_file'
     is_verified = 'is_verified'
     is_active = 'is_active'
-    bio = 'bio'
+    bio = None
+    api_key = 'api_key'
+    secret_key = 'secret_key'
     created_at = 'created_at'
     updated_at = 'updated_at'
 
