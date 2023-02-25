@@ -1,6 +1,7 @@
 import logging
-from flask import Flask, request
+from flask import Flask, request, send_from_directory
 from dotenv import dotenv_values
+import os
 
 from constants.error_message import ErrorMessage
 from constants.info_message import InfoMessage
@@ -54,6 +55,7 @@ def update_trader():
 @v1_blueprint.route("/trader/upload", methods=["POST"])
 def upload_summary_file():
     user_id = request.headers.get('user_id')
+    print ('user_id')
     if not user_id:
         return logger.error(ErrorMessage.BAD_REQUEST)
 
@@ -62,6 +64,7 @@ def upload_summary_file():
         return logger.error(ErrorMessage.BAD_REQUEST)
     sum_manager = Summarymanager()
     result = sum_manager.uploader(user_id, raw_data)
+    print(result)
     if not result:
         return logger.error(ErrorMessage.BAD_REQUEST)
 
@@ -77,7 +80,8 @@ def download_summary_file():
     response = sum_manager.downloader(user_id)
     if not response:
         return logger.error(ErrorMessage.BAD_REQUEST)
-    return response.generate_response()
+    uploads = os.path.join(app.root_path, config['UPLOAD_FOLDER'])
+    return send_from_directory(directory=uploads, path=response, as_attachment=True)
 
 
 # For upload the trader resume file
@@ -108,8 +112,8 @@ def download_resume_file():
     if not response:
         return logger.error(ErrorMessage.BAD_REQUEST)
 
-    return response.generate_response()
-
+    uploads = os.path.join(app.root_path, config['UPLOAD_FOLDER'])
+    return send_from_directory(directory=uploads, path=response, as_attachment=True)
 
 swagger.run_swagger(app)
 log.setup_logger()

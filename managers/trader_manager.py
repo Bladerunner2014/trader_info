@@ -18,7 +18,7 @@ class TraderManager:
         self.config = dotenv_values(".env")
         self.logger = logging.getLogger(__name__)
         self.dao = TraderDao()
-        self.db = QueryBuilder("test_trader")
+        self.db = QueryBuilder("trader")
 
     # insert new trader to the database
     def handle_trader(self, dt: dict):
@@ -59,6 +59,12 @@ class TraderManager:
                 self.logger.error(error)
                 raise Exception
         dict_result = self.create_dict_from_postgres(result)
+        if not dict_result:
+            res = ResponseHandler()
+            res.set_response(dict_result)
+            res.set_status_code(StatusCode.NOT_FOUND)
+            return res
+
         res = ResponseHandler()
         res.set_response(dict_result)
         res.set_status_code(StatusCode.SUCCESS)
@@ -99,10 +105,10 @@ class TraderManager:
                    'is_verified',
                    'is_active',
                    'bio',
-                   'api_key',
-                   'secret_key',
                    'created_at',
-                   'updated_at']
+                   'updated_at',
+                   'secret_key',
+                   'api_key']
         results_list = []
         for ls in res:
             results_list.append({columns[i]: ls[i] for i in range(len(columns))})
@@ -115,7 +121,7 @@ class Summarymanager:
 
     def __init__(self):
         self.config = dotenv_values(".env")
-        self.obj_storage = uploader_downloader.Objectstorage(self.config["BUCKET_NAME"])
+        self.obj_storage = uploader_downloader.Objectstorage(self.config["BUCKET_NAME_SUMMARY"])
         self.logger = logging.getLogger(__name__)
 
     def uploader(self, user_id, raw_data):
@@ -141,17 +147,14 @@ class Summarymanager:
             self.logger.error(ErrorMessage.MINIO_SELECT)
             self.logger.error(error)
             raise Exception
-        res = ResponseHandler()
-        res.set_response({"message": result})
-        res.set_status_code(StatusCode.SUCCESS)
-        return res
+        return user_id_with_suffix
 
 
 class ResumeManager:
 
     def __init__(self):
         self.config = dotenv_values(".env")
-        self.obj_storage = uploader_downloader.Objectstorage(self.config["BUCKET_NAME_Resume"])
+        self.obj_storage = uploader_downloader.Objectstorage(self.config["BUCKET_NAME_RESUME"])
         self.logger = logging.getLogger(__name__)
 
     def resume_uploader(self, user_id, raw_data):
@@ -177,7 +180,4 @@ class ResumeManager:
             self.logger.error(ErrorMessage.MINIO_SELECT)
             self.logger.error(error)
             raise Exception
-        res = ResponseHandler()
-        res.set_response({"message": result})
-        res.set_status_code(StatusCode.SUCCESS)
-        return res
+        return user_id

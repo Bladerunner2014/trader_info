@@ -8,7 +8,7 @@ from datetime import timezone
 
 class TraderDao:
     def __init__(self):
-        self.db = QueryBuilder("test_trader")
+        self.db = QueryBuilder("trader")
         self.op = SqlOperator()
 
     def insert_new_trader(self, trdb: TradersDB):
@@ -18,6 +18,8 @@ class TraderDao:
             raise error
 
     def select_trader(self, user_id):
+        print (user_id)
+        print (type(user_id))
         try:
             cond = DBCondition(term='user_id', operator=self.op.EQL, const=user_id)
             cond.build_condition()

@@ -9,7 +9,6 @@ config = dotenv_values(".env")
 class Objectstorage:
     def __init__(self, bucket_name: str):
         self.client = Minio(
-
             endpoint=config["ENDPOINT"],
             access_key=config["ACCESS_KEY"],
             secret_key=config["SECRET_KEY"],
@@ -25,14 +24,9 @@ class Objectstorage:
     def download(self, object_name: str):
         try:
             data = self.client.get_object(self.bucket, object_name)
-            with open('minio_file.csv', 'wb') as file_data:
+            with open(config["UPLOAD_FOLDER"] + "/" + object_name, 'wb') as file_data:
                 for d in data.stream(32 * 1024):
                     file_data.write(d)
-        except S3Error as exc:
-            print("error occurred.", exc)
-
-        try:
-            return self.client.get_object(self.bucket, object_name).data.decode()
         except S3Error as exc:
             print("error occurred.", exc)
 
