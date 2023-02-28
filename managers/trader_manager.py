@@ -23,16 +23,16 @@ class TraderManager:
     # insert new trader to the database
     def handle_trader(self, dt: dict):
         trader = TradersDB()
-        trader.user_id = dt.get('user_id', 'None')
+        trader.user_id = dt.get('user_id', "")
         trader.is_verified = dt.get('is_verified', False)
         trader.is_active = dt.get('is_active', True)
-        trader.bio = dt.get('bio', 'None')
-        trader.api_key = dt.get('api_key', 'None')
-        trader.secret_key = dt.get('secret_key', 'None')
-        trader.exchange = dt.get('exchange', 'None')
+        trader.bio = dt.get('bio', "")
+        trader.api_key = dt.get('api_key')
+        trader.secret_key = dt.get('secret_key')
+        trader.exchange = dt.get('exchange')
         res = ResponseHandler()
 
-        if all([trader.secret_key, trader.api_key, trader.exchange]):
+        if not all([trader.secret_key, trader.api_key, trader.exchange]):
             self.logger.error(ErrorMessage.BAD_REQUEST)
             res.set_status_code(StatusCode.BAD_REQUEST)
             res.set_response({"message": ErrorMessage.TRADER_REQUIRE})
@@ -110,13 +110,13 @@ class TraderManager:
         columns = ['id',
                    'user_id',
                    'is_verified',
-                   'is_active'
+                   'is_active',
                    'bio',
-                   'api_key',
-                   'exchange',
-                   'secret_key',
                    'created_at',
-                   'updated_at']
+                   'updated_at',
+                   'secret_key',
+                   'api_key',
+                   'exchange']
         results_list = []
         for ls in res:
             results_list.append({columns[i]: ls[i] for i in range(len(columns))})
@@ -146,7 +146,7 @@ class TradeManager:
 
         res = ResponseHandler()
 
-        if all([trader.secret_key, trader.api_key, trader.exchange]):
+        if not all([trader.secret_key, trader.api_key, trader.exchange]):
             self.logger.error(ErrorMessage.BAD_REQUEST)
             res.set_status_code(StatusCode.BAD_REQUEST)
             res.set_response({"message": ErrorMessage.TRADER_REQUIRE})
@@ -218,13 +218,13 @@ class TradeManager:
         columns = ['id',
                    'user_id',
                    'is_verified',
-                   'is_active'
+                   'is_active',
                    'bio',
-                   'api_key',
-                   'exchange',
-                   'secret_key',
                    'created_at',
-                   'updated_at']
+                   'updated_at',
+                   'secret_key',
+                   'api_key',
+                   'exchange']
         results_list = []
         for ls in res:
             results_list.append({columns[i]: ls[i] for i in range(len(columns))})
