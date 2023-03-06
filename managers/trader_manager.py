@@ -49,8 +49,28 @@ class TraderManager:
 
         return res
 
+    def trader_detail_by_id(self, trader_id):
+        try:
+            result = self.dao.select_trader_by_id(trader_id)
+        except Exception as error:
+            self.logger.error(ErrorMessage.DB_SELECT)
+            self.logger.error(error)
+            raise Exception
+        res = ResponseHandler()
+        if not result:
+            self.logger.error(ErrorMessage.DB_SELECT)
+            result = ErrorMessage.DB_SELECT
+            res.set_status_code(StatusCode.NOT_FOUND)
+        else:
+            res.set_status_code(StatusCode.SUCCESS)
+        dictionary_result = self.create_dict_from_postgres(result)
+
+        res.set_response({"resu": dictionary_result})
+        return res
+
     # return the information of a trader
     def trader_detail(self, user_id):
+
         if user_id == 'all':
             try:
                 result = self.db.select()
@@ -254,14 +274,16 @@ class Miniomanager:
         return res
 
     def downloader(self, user_id):
+        res = ResponseHandler()
         try:
-            self.obj_storage.download(user_id)
+            result = self.obj_storage.download(user_id)
+            res.set_response({"url": result})
+            res.set_status_code(StatusCode.SUCCESS)
         except Exception as error:
             self.logger.error(ErrorMessage.MINIO_SELECT)
             self.logger.error(error)
             raise Exception
-
-        return user_id
+        return res
 
 
 class Summarymanager:
@@ -272,10 +294,9 @@ class Summarymanager:
         self.logger = logging.getLogger(__name__)
 
     def uploader(self, user_id, raw_data):
-        user_id_with_suffix = user_id + ".csv"
         res = ResponseHandler()
         try:
-            self.obj_storage.upload(user_id_with_suffix, raw_data)
+            self.obj_storage.upload(user_id, raw_data)
             res.set_status_code(StatusCode.SUCCESS)
             res.set_response({"message": InfoMessage.MINIO_INSERT})
         except Exception as error:
@@ -287,14 +308,16 @@ class Summarymanager:
         return res
 
     def downloader(self, user_id):
-        user_id_with_suffix = user_id + ".csv"
+        res = ResponseHandler()
         try:
-            result = self.obj_storage.download(user_id_with_suffix)
+            result = self.obj_storage.download(user_id)
+            res.set_response({"url": result})
+            res.set_status_code(StatusCode.SUCCESS)
         except Exception as error:
             self.logger.error(ErrorMessage.MINIO_SELECT)
             self.logger.error(error)
             raise Exception
-        return user_id_with_suffix
+        return res
 
 
 class ResumeManager:
@@ -304,8 +327,7 @@ class ResumeManager:
         self.obj_storage = uploader_downloader.Objectstorage(self.config["BUCKET_NAME"])
         self.logger = logging.getLogger(__name__)
 
-    def resume_uploader(self, user_id, raw_data):
-        user_id = user_id + ".pdf"
+    def uploader(self, user_id, raw_data):
         res = ResponseHandler()
         try:
             self.obj_storage.upload(user_id, raw_data)
@@ -316,15 +338,17 @@ class ResumeManager:
             self.logger.error(error)
             res.set_status_code(StatusCode.INTERNAL_ERROR)
             res.set_response({"message": ErrorMessage.MINIO_INSERT})
+
         return res
 
-    def resume_downloader(self, user_id):
-        user_id = user_id + ".pdf"
-
+    def downloader(self, user_id):
+        res = ResponseHandler()
         try:
             result = self.obj_storage.download(user_id)
+            res.set_response({"url": result})
+            res.set_status_code(StatusCode.SUCCESS)
         except Exception as error:
             self.logger.error(ErrorMessage.MINIO_SELECT)
             self.logger.error(error)
             raise Exception
-        return user_id
+        return res
