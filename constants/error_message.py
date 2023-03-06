@@ -23,8 +23,10 @@ class ErrorMessage:
     AUTH_INSERT = "auth insert error"
     URL_INSERT = "url insert error"
     TRADER_INSERT = "trader insert error"
+    TRADER_REQUIRE = "trader.secret_key, trader.api_key, trader.exchange are required"
     MINIO_SELECT = "object doesnt exists"
-    MINIO_INSERT = "object doesnt found"
+    MINIO_INSERT = "object doesnt upload"
+    EXTENSION = "invalid extension"
 
     REDIS_CONNECTION = "redis connection error"
     REDIS_SET = "redis SET error"

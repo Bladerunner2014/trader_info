@@ -9,11 +9,12 @@ class TradersDB:
     user_id = 'user_id'
     is_verified = 'is_verified'
     is_active = 'is_active'
-    bio = None
-    api_key = 'api_key'
-    secret_key = 'secret_key'
+    bio = 'bio'
     created_at = 'created_at'
     updated_at = 'updated_at'
+    secret_key = 'secret_key'
+    api_key = 'api_key'
+    exchange = 'exchange'
 
     def __init__(self):
         self.created_at = datetime.datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S.%f")

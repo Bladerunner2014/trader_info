@@ -2,6 +2,7 @@ from minio import Minio
 from minio.error import S3Error
 import io
 from dotenv import dotenv_values
+from datetime import timedelta
 
 config = dotenv_values(".env")
 
@@ -17,22 +18,25 @@ class Objectstorage:
         )
         self.bucket = bucket_name
 
-    def upload(self, object_name: str, sum_life):
+    def make_bucket(self, bucket_name):
+        found = self.client.bucket_exists(bucket_name)
+        if not found:
+            self.client.make_bucket(bucket_name)
+        else:
+            return
 
-        self.client.put_object(self.bucket, object_name, data=io.BytesIO(sum_life), length=-1,
-                               part_size=10 * 1024 * 1024)
+    def upload(self, object_name: str, object_file):
+        try:
+            self.client.put_object(self.bucket, object_name, data=io.BytesIO(object_file), length=-1,
+                                   part_size=10 * 1024 * 1024)
+        except S3Error as exc:
+            raise exc
 
     def download(self, object_name: str):
         try:
-            data = self.client.get_object(self.bucket, object_name)
-            with open('minio_file.csv', 'wb') as file_data:
-                for d in data.stream(32 * 1024):
-                    file_data.write(d)
-        except S3Error as exc:
-            print("error occurred.", exc)
 
-        try:
-            return self.client.get_object(self.bucket, object_name).data.decode()
+            return self.client.presigned_get_object(self.bucket, object_name, expires=timedelta(days=7),
+                                                    response_headers=None, request_date=None, version_id=None,
+                                                    extra_query_params=None)
         except S3Error as exc:
-            print("error occurred.", exc)
-
+            raise exc

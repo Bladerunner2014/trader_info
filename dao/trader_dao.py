@@ -4,11 +4,14 @@ from db.db_condition import DBCondition
 from constants.sql_operator import SqlOperator
 import datetime
 from datetime import timezone
+from dotenv import dotenv_values
 
 
 class TraderDao:
     def __init__(self):
-        self.db = QueryBuilder("test_trader")
+        self.config = dotenv_values(".env")
+
+        self.db = QueryBuilder(self.config["TABLE_NAME"])
         self.op = SqlOperator()
 
     def insert_new_trader(self, trdb: TradersDB):
@@ -16,6 +19,15 @@ class TraderDao:
             self.db.insert(trdb)
         except Exception as error:
             raise error
+
+    def select_trader_by_id(self, investor_id):
+        try:
+            cond = DBCondition(term='id', operator=self.op.EQL, const=investor_id)
+            cond.build_condition()
+            result = self.db.select(condition=cond.condition)
+        except Exception as error:
+            raise error
+        return result
 
     def select_trader(self, user_id):
         try:

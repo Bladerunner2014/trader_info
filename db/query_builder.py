@@ -81,4 +81,3 @@ class QueryBuilder:
             raise error
         self.db.close_cursor_connection(cursor)
         # self.db.return_connection_to_pool(self.db.db_connection)
-
