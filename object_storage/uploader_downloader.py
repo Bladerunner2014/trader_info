@@ -34,9 +34,11 @@ class Objectstorage:
 
     def download(self, object_name: str):
         try:
+            self.client.stat_object(self.bucket, object_name, ssec=None, version_id=None, extra_query_params=None)
 
             return self.client.presigned_get_object(self.bucket, object_name, expires=timedelta(days=7),
                                                     response_headers=None, request_date=None, version_id=None,
                                                     extra_query_params=None)
-        except S3Error as exc:
-            raise exc
+
+        except S3Error:
+            return None
